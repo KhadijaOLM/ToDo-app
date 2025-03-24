@@ -1,0 +1,184 @@
+.task-detail-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .task-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  .edit-title {
+    width: 70%;
+    padding: 0.5rem;
+    font-size: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  .status-badge.a-faire {
+    background-color: #ffecb3;
+    color: #ff6f00;
+  }
+  
+  .status-badge.en-cours {
+    background-color: #bbdefb;
+    color: #0d47a1;
+  }
+  
+  .status-badge.terminé {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+  }
+  
+  .task-meta {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .meta-label {
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+  }
+  
+  .task-content {
+    margin-bottom: 2rem;
+  }
+  
+  .task-content h3 {
+    color: #444;
+    margin-bottom: 1rem;
+  }
+  
+  .edit-description {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  
+  .task-dates h3 {
+    color: #444;
+    margin-bottom: 1rem;
+  }
+  
+  .date-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .date-item {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .date-label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #555;
+  }
+  
+  .task-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .task-actions button {
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+  
+  .edit-btn {
+    background-color: #2196f3;
+    color: white;
+  }
+  
+  .edit-btn:hover {
+    background-color: #0d8bf2;
+  }
+  
+  .delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .delete-btn:hover {
+    background-color: #e53935;
+  }
+  
+  .back-btn {
+    background-color: #9e9e9e;
+    color: white;
+  }
+  
+  .back-btn:hover {
+    background-color: #757575;
+  }
+  
+  .save-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .save-btn:hover {
+    background-color: #43a047;
+  }
+  
+  .cancel-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #e53935;
+  }
+  
+  .loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+  }
+  
+  .error-message {
+    text-align: center;
+    padding: 2rem;
+    color: #f44336;
+    font-size: 1.2rem;
+  }

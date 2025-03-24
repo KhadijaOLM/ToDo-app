@@ -1,12 +1,12 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const JWT_SECRET = "b74553890072f29c35b4eb869dc895acff4f863262ddd82c796a98f91acc5039";
 
 // Inscription d'un utilisateur
 const registerUser = async (req, res) => {
+  const { username, email, password } = req.body;
   try {
-    const { username, email, password } = req.body;
-
     // Vérifier si l'utilisateur existe déjà
     let user = await User.findOne({ email });
     if (user) {
@@ -27,7 +27,7 @@ const registerUser = async (req, res) => {
     await user.save();
 
     // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
       expiresIn: '1h',
     });
 
@@ -55,7 +55,7 @@ const loginUser = async (req, res) => {
     }
 
     // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
       expiresIn: '1h',
     });
 

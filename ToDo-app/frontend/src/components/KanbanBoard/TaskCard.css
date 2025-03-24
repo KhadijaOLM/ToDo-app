@@ -1,0 +1,80 @@
+.task-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+  }
+  
+  .task-card.dragging {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: rotate(2deg);
+  }
+  
+  .task-card.a-faire {
+    border-left: 4px solid #FFA726;
+  }
+  
+  .task-card.en-cours {
+    border-left: 4px solid #42A5F5;
+  }
+  
+  .task-card.terminé {
+    border-left: 4px solid #66BB6A;
+  }
+  
+  .task-content {
+    text-decoration: none;
+    color: #333;
+    display: block;
+  }
+  
+  .task-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 1em;
+  }
+  
+  .task-description {
+    color: #666;
+    font-size: 0.9em;
+    margin: 8px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: #888;
+  }
+  
+  .due-date {
+    font-style: italic;
+  }
+  
+  .task-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  
+  .task-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1em;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+  
+  .task-actions button:hover {
+    opacity: 1;
+  }
+  
+  .edit-btn { color: #42A5F5; }
+  .delete-btn { color: #EF5350; }

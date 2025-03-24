@@ -6,7 +6,8 @@ const createList = async (req, res) => {
     const { title, boardId } = req.body;
     const list = new List({
       title,
-      boardId,
+      userId: req.user.id, // Associe la liste à l'utilisateur connecté
+      boardId, // Associe la liste à un tableau
     });
 
     await list.save();
@@ -19,7 +20,7 @@ const createList = async (req, res) => {
 // Obtenir toutes les listes d'un tableau
 const getLists = async (req, res) => {
   try {
-    const lists = await List.find({ boardId: req.params.boardId });
+    const lists = await List.find({ boardId: req.params.boardId, userId: req.user.id }); // Filtre par tableau et utilisateur
     res.status(200).json(lists);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -30,13 +31,16 @@ const getLists = async (req, res) => {
 const updateList = async (req, res) => {
   try {
     const { title } = req.body;
-    const list = await List.findById(req.params.id);
+    const list = await List.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id }, // Vérifie que l'utilisateur est le propriétaire
+      { title },
+      { new: true } // Renvoie la liste mise à jour
+    );
+
     if (!list) {
-      return res.status(404).json({ message: 'Liste non trouvée' });
+      return res.status(404).json({ message: 'Liste non trouvée ou action non autorisée' });
     }
 
-    list.title = title;
-    await list.save();
     res.status(200).json(list);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -46,12 +50,11 @@ const updateList = async (req, res) => {
 // Supprimer une liste
 const deleteList = async (req, res) => {
   try {
-    const list = await List.findById(req.params.id);
+    const list = await List.findOneAndDelete({ _id: req.params.id, userId: req.user.id }); // Vérifie que l'utilisateur est le propriétaire
     if (!list) {
-      return res.status(404).json({ message: 'Liste non trouvée' });
+      return res.status(404).json({ message: 'Liste non trouvée ou action non autorisée' });
     }
 
-    await list.remove();
     res.status(200).json({ message: 'Liste supprimée' });
   } catch (err) {
     res.status(500).json({ message: err.message });

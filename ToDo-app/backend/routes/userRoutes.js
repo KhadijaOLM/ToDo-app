@@ -1,16 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { getUsers, deleteUser, updateUserRole } = require('../controllers/userController');
+const { registerUser, loginUser, getCurrentUser, updateUser, deleteUser } = require('../controllers/userController');
 const authMiddleware = require('../middleware/authMiddleware');
-const adminMiddleware = require('../middleware/adminMiddleware');
 
-// Route pour obtenir tous les utilisateurs (admin seulement)
-router.get('/', authMiddleware, adminMiddleware, getUsers);
+// Route pour l'inscription
+router.post('/register', registerUser);
 
-// Route pour supprimer un utilisateur (admin seulement)
-router.delete('/:id', authMiddleware, adminMiddleware, deleteUser);
+// Route pour la connexion
+router.post('/login', loginUser);
 
-// Route pour mettre à jour le rôle d'un utilisateur (admin seulement)
-router.put('/:id/role', authMiddleware, adminMiddleware, updateUserRole);
+// Route pour obtenir les informations de l'utilisateur connecté
+router.get('/me', authMiddleware, getCurrentUser);
+
+// Route pour mettre à jour les informations de l'utilisateur
+router.put('/me', authMiddleware, updateUser);
+
+// Route pour supprimer un utilisateur
+router.delete('/me', authMiddleware, deleteUser);
 
 module.exports = router;

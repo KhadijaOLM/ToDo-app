@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './BoardForm.css';
 
-const BoardForm = ({ onSubmit, initialData = { title: '' } }) => {
-  const [title, setTitle] = useState(initialData.title);
+function BoardForm({ onAddBoard, initialValue = " " }) {
+  const [inputValue, setInputValue] = useState(initialValue); 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ title });
+    if (!inputValue.trim()) return; // Empêche les noms vides
+    onAddBoard(inputValue);
+    setInputValue(""); // Réinitialise l'input après soumission
   };
-
   return (
-    <form className="board-form" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Titre du tableau"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Nom du tableau"
       />
-      <button type="submit">Enregistrer</button>
+      <button type="submit">Créer</button>
     </form>
   );
 };

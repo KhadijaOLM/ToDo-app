@@ -1,20 +1,40 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; 
+import axios from 'axios'; 
 import './Register.css';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(''); 
+  const navigate = useNavigate(); 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Ajouter la logique d'inscription ici
+
+    try {
+    
+      const response = await axios.post('http://localhost:5000/api/users/register', {
+        username,
+        email,
+        password,
+      });
+
+
+      if (response.status === 201) {
+        navigate('/login'); 
+      }
+    } catch (err) {
+      
+      setError(err.response?.data?.message || 'Une erreur est survenue');
+    }
   };
 
   return (
     <div className="register-container">
       <h2>S'inscrire</h2>
+      {error && <p className="error-message">{error}</p>} 
       <form onSubmit={handleSubmit}>
         <input
           type="text"

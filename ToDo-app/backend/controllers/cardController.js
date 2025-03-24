@@ -3,10 +3,12 @@ const Card = require('../models/Card');
 // Créer une carte
 const createCard = async (req, res) => {
   try {
-    const { title, listId } = req.body;
+    const { title, description, boardId } = req.body;
     const card = new Card({
       title,
-      listId,
+      description,
+      userId: req.user.id, // Associe la carte à l'utilisateur connecté
+      boardId, // Associe la carte à un tableau
     });
 
     await card.save();
@@ -16,10 +18,10 @@ const createCard = async (req, res) => {
   }
 };
 
-// Obtenir toutes les cartes d'une liste
+// Obtenir toutes les cartes d'un tableau
 const getCards = async (req, res) => {
   try {
-    const cards = await Card.find({ listId: req.params.listId });
+    const cards = await Card.find({ boardId: req.params.boardId, userId: req.user.id }); // Filtre par tableau et utilisateur
     res.status(200).json(cards);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -30,31 +32,16 @@ const getCards = async (req, res) => {
 const updateCard = async (req, res) => {
   try {
     const { title, description } = req.body;
-    const card = await Card.findById(req.params.id);
+    const card = await Card.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id }, // Vérifie que l'utilisateur est le propriétaire
+      { title, description },
+      { new: true } // Renvoie la carte mise à jour
+    );
+
     if (!card) {
-      return res.status(404).json({ message: 'Carte non trouvée' });
+      return res.status(404).json({ message: 'Carte non trouvée ou action non autorisée' });
     }
 
-    card.title = title;
-    card.description = description;
-    await card.save();
-    res.status(200).json(card);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// Déplacer une carte
-const moveCard = async (req, res) => {
-  try {
-    const { listId } = req.body;
-    const card = await Card.findById(req.params.id);
-    if (!card) {
-      return res.status(404).json({ message: 'Carte non trouvée' });
-    }
-
-    card.listId = listId;
-    await card.save();
     res.status(200).json(card);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -64,12 +51,11 @@ const moveCard = async (req, res) => {
 // Supprimer une carte
 const deleteCard = async (req, res) => {
   try {
-    const card = await Card.findById(req.params.id);
+    const card = await Card.findOneAndDelete({ _id: req.params.id, userId: req.user.id }); // Vérifie que l'utilisateur est le propriétaire
     if (!card) {
-      return res.status(404).json({ message: 'Carte non trouvée' });
+      return res.status(404).json({ message: 'Carte non trouvée ou action non autorisée' });
     }
 
-    await card.remove();
     res.status(200).json({ message: 'Carte supprimée' });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -80,6 +66,5 @@ module.exports = {
   createCard,
   getCards,
   updateCard,
-  moveCard,
   deleteCard,
 };
