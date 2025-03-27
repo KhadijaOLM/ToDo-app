@@ -4,7 +4,7 @@ import './Footer.css';
 const Footer = () => {
   return (
     <footer className="footer">
-      <p>&copy; 2023 TodoApp. Tous droits réservés.</p>
+      <p>&copy; 2025 TodoApp. Tous droits réservés.</p>
     </footer>
   );
 };

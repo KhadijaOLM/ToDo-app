@@ -1,28 +1,60 @@
 const Board = require('../models/Board');
 
+const checkBoardOwner = async (req, res, next) => {
+  try {
+    const board = await Board.findById(req.params.id);
+    
+    if (!board) {
+      return res.status(404).json({ message: 'Tableau non trouvé' });
+    }
+
+    // Vérification renforcée
+    if (!req.user || !board.userId || board.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Action non autorisée' });
+    }
+
+    req.board = board;
+    next();
+  } catch (err) {
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+};
+
 // Créer un tableau
 const createBoard = async (req, res) => {
+  console.log('Utilisateur authentifié:', req.user);
   try {
-    const { title } = req.body;
+    const { title, description } = req.body;
+
+    
+    if (!req.user || !req.user.id) {
+      return res.status(403).json({ message: 'Utilisateur non authentifié' });
+    }
+
+    
     const board = new Board({
       title,
+      description,
       userId: req.user.id,
     });
 
     await board.save();
     res.status(201).json(board);
   } catch (err) {
+    console.error('Erreur lors de la création du tableau:', err);
     res.status(500).json({ message: err.message });
   }
 };
+
+
 
 // Obtenir tous les tableaux
 const getBoards = async (req, res) => {
   try {
     const boards = await Board.find({ userId: req.user.id });
     res.status(200).json(boards);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 };
 
@@ -31,6 +63,9 @@ const updateBoard = async (req, res) => {
   try {
     const { title } = req.body;
     const board = await Board.findById(req.params.id);
+    if (board.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Non autorisé' });
+    }
     if (!board) {
       return res.status(404).json({ message: 'Tableau non trouvé' });
     }
@@ -46,7 +81,10 @@ const updateBoard = async (req, res) => {
 // Supprimer un tableau
 const deleteBoard = async (req, res) => {
   try {
-    const board = await Board.findById(req.params.id);
+    const board = await Board.findByIdAndDelete(req.params.id);
+    if (board.userId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Non autorisé' });
+    }
     if (!board) {
       return res.status(404).json({ message: 'Tableau non trouvé' });
     }
@@ -59,6 +97,7 @@ const deleteBoard = async (req, res) => {
 };
 
 module.exports = {
+  checkBoardOwner,
   createBoard,
   getBoards,
   updateBoard,

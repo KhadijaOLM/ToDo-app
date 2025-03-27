@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext } from '@hello-pangea/dnd';
 import BoardForm from '../components/Board/BoardForm';
 import BoardItem from '../components/Board/BoardItem';
-import TaskForm from '../components/Task/TaskForm';
+//import TaskForm from '../components/Task/TaskForm';
 import KanbanView from '../components/KanbanBoard/KanbanView';
 import api from '../utils/api';
 import './BoardPage.css';
 
-const BoardsPage = () => {
+const BoardPage = () => {
   const [boards, setBoards] = useState([]);
   const [editingBoard, setEditingBoard] = useState(null);
   const [selectedBoard, setSelectedBoard] = useState(null);
@@ -18,11 +18,18 @@ const BoardsPage = () => {
   useEffect(() => {
     const fetchBoards = async () => {
       try {
-        const response = await api.get('/boards');
+        const token = localStorage.getItem('token');
+        const response = await api.get('/boards', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },}
+        
+        );
+        console.log(response.data);
         setBoards(response.data);
         setIsLoading(false);
-      } catch (err) {
-        console.error('Erreur:', err);
+      } catch (error) {
+        console.error('Erreur:', error);
         setIsLoading(false);
       }
     };
@@ -38,6 +45,7 @@ const BoardsPage = () => {
           setTasks(response.data);
         } catch (err) {
           console.error('Erreur:', err);
+          setIsLoading(false);
         }
       };
       fetchTasks();
@@ -46,11 +54,14 @@ const BoardsPage = () => {
 
   // Créer un tableau
   const handleAddBoard = async (title) => {
+    console.log("Titre reçu:", title);
+    if (!title.trim()) return; // Bloquer les titres vides
     try {
       const response = await api.post('/boards', { title });
-      setBoards([...boards, response.data]);
+      console.log("Réponse API:", response.data);
+      setBoards(prevBoards => [...prevBoards, response.data]);
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error(err);
     }
   };
 
@@ -177,12 +188,10 @@ const BoardsPage = () => {
       <div className="boards-container">
         {boards.map((board) => (
           <BoardItem
-            key={board._id}
-            board={board}
-            onDelete={handleDeleteBoard}
-            onEdit={setEditingBoard}
-            onClick={() => setSelectedBoard(board)}
-            isSelected={selectedBoard && selectedBoard._id === board._id}
+          key={board._id}
+          board={board}
+          onDelete={handleDeleteBoard}
+          onEdit={() => setEditingBoard(board)}
           />
         ))}
       </div>
@@ -208,4 +217,4 @@ const BoardsPage = () => {
   );
 };
 
-export default BoardsPage;
+export default BoardPage;

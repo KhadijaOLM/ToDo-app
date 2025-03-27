@@ -7,12 +7,14 @@ import AdminPage from './pages/AdminPage';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import ProtectedRoute from './components/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 import './App.css';
 
 function App() {
   return (
+    <AuthProvider>
     <div className="app">
-      <Menu />
+    <Menu />
       <div className="content">
         <Routes>
           <Route path="/" element={<Home />} />
@@ -22,15 +24,16 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/boards" element={
-            <ProtectedRoute>
+           <ProtectedRoute> 
               <BoardPage />
-            </ProtectedRoute>
+           </ProtectedRoute> 
           }
         />
         <Route path="/" element={<Login />} />
         </Routes>
       </div>
     </div>
+    </AuthProvider>
   );
 }
 
