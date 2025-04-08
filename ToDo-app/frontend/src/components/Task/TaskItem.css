@@ -1,70 +1,61 @@
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
 .task-item {
-    background: white;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .task-item.a-faire {
-    border-left: 4px solid #ff9800;
-  }
-  
-  .task-item.en-cours {
-    border-left: 4px solid #2196f3;
-  }
-  
-  .task-item.terminé {
-    border-left: 4px solid #4caf50;
-  }
-  
-  .task-content {
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .task-content h3 {
-    margin-top: 0;
-    color: #333;
-  }
-  
-  .task-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 10px;
-  }
-  
-  .task-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-  }
-  
-  .task-actions button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .task-edit-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .task-edit-form input,
-  .task-edit-form textarea,
-  .task-edit-form select {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .task-edit-form textarea {
-    min-height: 80px;
-    resize: vertical;
-  }
+  background: #fff;
+  border-left: 4px solid #4CAF50; /* Couleur par défaut */
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  cursor: pointer;
+}
+
+.task-item.a-faire { border-color: #FFC107; }
+.task-item.en-cours { border-color: #2196F3; }
+.task-item.terminé { border-color: #4CAF50; }
+
+.task-item h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+}
+
+.task-description {
+  color: #555;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.task-meta {
+  font-size: 12px;
+  color: #888;
+}
+
+.board-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.edit-btn {
+  background: #2196F3;
+  color: white;
+}
+
+.delete-btn {
+  background: #f44336;
+  color: white;
+}
+
+.board-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

@@ -78,9 +78,9 @@ const updateUser = async (req, res) => {
   try {
     const { username, email } = req.body;
     const user = await User.findOneAndUpdate(
-      { _id: req.user.id }, // Vérifie que l'utilisateur est le propriétaire
+      { _id: req.user.id }, 
       { username, email },
-      { new: true } // Renvoie l'utilisateur mis à jour
+      { new: true } 
     );
 
     if (!user) {
@@ -96,7 +96,7 @@ const updateUser = async (req, res) => {
 // Supprimer un utilisateur
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findOneAndDelete({ _id: req.user.id }); // Vérifie que l'utilisateur est le propriétaire
+    const user = await User.findOneAndDelete({ _id: req.user.id }); 
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }

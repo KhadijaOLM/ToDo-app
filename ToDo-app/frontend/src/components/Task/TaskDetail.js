@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import * as locales from 'date-fns/locale';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import api from '../../utils/api';
+import { FaEdit, FaTrash, FaSave, FaTimes, FaPaperclip, FaCode } from 'react-icons/fa';
 import './TaskDetail.css';
 
 const TaskDetail = () => {
@@ -13,32 +14,43 @@ const TaskDetail = () => {
   const [editedTask, setEditedTask] = useState({
     title: '',
     description: '',
-    status: 'A faire',
-    due_date: ''
+    dueDate: '',
+    status: 'A faire'
   });
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+  const [codeSnippet, setCodeSnippet] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch task details
+  // Charger la tâche et ses données associées
   useEffect(() => {
-    const fetchTask = async () => {
+    const fetchTaskData = async () => {
       try {
-        const response = await api.get(`/tasks/${taskId}`);
-        setTask(response.data);
+        const [taskRes, commentsRes, attachmentsRes] = await Promise.all([
+          api.get(`/tasks/${taskId}`),
+          api.get(`/tasks/${taskId}/comments`),
+          api.get(`/tasks/${taskId}/attachments`)
+        ]);
+        
+        setTask(taskRes.data);
         setEditedTask({
-          title: response.data.title,
-          description: response.data.description || '',
-          status: response.data.status,
-          due_date: response.data.due_date ? format(parseISO(response.data.due_date), 'yyyy-MM-dd') : ''
+          title: taskRes.data.title,
+          description: taskRes.data.description,
+          dueDate: taskRes.data.dueDate || '',
+          status: taskRes.data.status
         });
+        setComments(commentsRes.data);
+        setAttachments(attachmentsRes.data);
       } catch (err) {
-        console.error('Failed to fetch task:', err);
-        navigate('/not-found', { replace: true });
+        console.error('Erreur chargement tâche:', err);
+        navigate('/not-found');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchTask();
+    fetchTaskData();
   }, [taskId, navigate]);
 
   const handleInputChange = (e) => {
@@ -48,36 +60,85 @@ const TaskDetail = () => {
 
   const handleSave = async () => {
     try {
-      const payload = {
-        ...editedTask,
-        due_date: editedTask.due_date || null
-      };
-      
-      const response = await api.put(`/tasks/${taskId}`, payload);
+      const response = await api.put(`/tasks/${taskId}`, editedTask);
       setTask(response.data);
       setIsEditing(false);
     } catch (err) {
-      console.error('Failed to update task:', err);
+      console.error('Erreur mise à jour:', err);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette tâche ?')) {
+    if (window.confirm('Supprimer cette tâche ?')) {
       try {
         await api.delete(`/tasks/${taskId}`);
         navigate(-1); // Retour à la page précédente
       } catch (err) {
-        console.error('Failed to delete task:', err);
+        console.error('Erreur suppression:', err);
       }
     }
   };
 
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const response = await api.patch(`/tasks/${taskId}`, { status: newStatus });
+      setTask(response.data);
+      setEditedTask(prev => ({ ...prev, status: newStatus }));
+    } catch (err) {
+      console.error('Erreur changement statut:', err);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!comment.trim()) return;
+    
+    try {
+      const response = await api.post(`/tasks/${taskId}/comments`, { text: comment });
+      setComments([...comments, response.data]);
+      setComment('');
+    } catch (err) {
+      console.error('Erreur ajout commentaire:', err);
+    }
+  };
+
+  const handleAddAttachment = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await api.post(`/tasks/${taskId}/attachments`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setAttachments([...attachments, response.data]);
+    } catch (err) {
+      console.error('Erreur ajout fichier:', err);
+    }
+  };
+
+  const handleAddCodeSnippet = async () => {
+    if (!codeSnippet.trim()) return;
+
+    try {
+      const response = await api.post(`/tasks/${taskId}/code`, { code: codeSnippet });
+      // Supposons que l'API retourne la tâche mise à jour avec le code
+      setTask(response.data);
+      setCodeSnippet('');
+    } catch (err) {
+      console.error('Erreur ajout code:', err);
+    }
+  };
+
   if (isLoading) {
-    return <div className="loading-spinner">Chargement...</div>;
+    return <div className="loading">Chargement...</div>;
   }
 
   if (!task) {
-    return <div className="error-message">Tâche non trouvée</div>;
+    return <div className="error">Tâche non trouvée</div>;
   }
 
   return (
@@ -85,7 +146,6 @@ const TaskDetail = () => {
       <div className="task-header">
         {isEditing ? (
           <input
-            type="text"
             name="title"
             value={editedTask.title}
             onChange={handleInputChange}
@@ -94,9 +154,9 @@ const TaskDetail = () => {
         ) : (
           <h1>{task.title}</h1>
         )}
-        <span className={`status-badge ${task.status.toLowerCase().replace(' ', '-')}`}>
+        <div className={`status-badge ${task.status.toLowerCase().replace(' ', '-')}`}>
           {task.status}
-        </span>
+        </div>
       </div>
 
       <div className="task-meta">
@@ -106,12 +166,14 @@ const TaskDetail = () => {
             {format(new Date(task.createdAt), 'PPP', { locale: fr })}
           </span>
         </div>
-        <div className="meta-item">
-          <span className="meta-label">Dernière modification :</span>
-          <span className="meta-value">
-            {format(new Date(task.updatedAt), 'PPPp', { locale: fr })}
-          </span>
-        </div>
+        {task.dueDate && (
+          <div className="meta-item">
+            <span className="meta-label">Échéance :</span>
+            <span className="meta-value">
+              {format(new Date(task.dueDate), 'PPP', { locale: fr })}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="task-content">
@@ -124,81 +186,123 @@ const TaskDetail = () => {
             className="edit-description"
           />
         ) : (
-          <p>{task.description || 'Aucune description fournie'}</p>
+          <p>{task.description || 'Aucune description'}</p>
         )}
       </div>
 
-      <div className="task-dates">
-        <h3>Dates</h3>
-        <div className="date-grid">
-          <div className="date-item">
-            <span className="date-label">Échéance :</span>
-            {isEditing ? (
-              <input
-                type="date"
-                name="due_date"
-                value={editedTask.due_date}
-                onChange={handleInputChange}
-              />
-            ) : (
-              <span className="date-value">
-                {task.due_date 
-                  ? format(parseISO(task.due_date), 'PPP', { locale: fr })
-                  : 'Non définie'}
-              </span>
-            )}
-          </div>
-          <div className="date-item">
-            <span className="date-label">Statut :</span>
-            {isEditing ? (
-              <select
-                name="status"
-                value={editedTask.status}
-                onChange={handleInputChange}
-              >
-                <option value="A faire">A faire</option>
-                <option value="En cours">En cours</option>
-                <option value="Terminé">Terminé</option>
-              </select>
-            ) : (
-              <span className="date-value">{task.status}</span>
-            )}
-          </div>
+      <div className="task-section">
+        <h3>Statut</h3>
+        <div className="status-actions">
+          <button
+            onClick={() => handleStatusChange('A faire')}
+            className={task.status === 'A faire' ? 'active' : ''}
+          >
+            À faire
+          </button>
+          <button
+            onClick={() => handleStatusChange('En cours')}
+            className={task.status === 'En cours' ? 'active' : ''}
+          >
+            En cours
+          </button>
+          <button
+            onClick={() => handleStatusChange('Terminé')}
+            className={task.status === 'Terminé' ? 'active' : ''}
+          >
+            Terminé
+          </button>
         </div>
+      </div>
+
+      {isEditing && (
+        <div className="task-section">
+          <h3>Date d'échéance</h3>
+          <input
+            type="date"
+            name="dueDate"
+            value={editedTask.dueDate}
+            onChange={handleInputChange}
+          />
+        </div>
+      )}
+
+      <div className="task-section">
+        <h3>Commentaires ({comments.length})</h3>
+        <div className="comment-list">
+          {comments.map(comment => (
+            <div key={comment._id} className="comment">
+              <p>{comment.text}</p>
+              <small>
+                {format(new Date(comment.createdAt), 'PPPp', { locale: fr })}
+              </small>
+            </div>
+          ))}
+        </div>
+        <div className="comment-form">
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="Ajouter un commentaire..."
+          />
+          <button onClick={handleAddComment}>Ajouter</button>
+        </div>
+      </div>
+
+      <div className="task-section">
+        <h3>Fichiers joints ({attachments.length})</h3>
+        <div className="attachment-list">
+          {attachments.map(file => (
+            <div key={file._id} className="attachment">
+              <FaPaperclip />
+              <a href={`${api.defaults.baseURL}/uploads/${file.path}`} target="_blank" rel="noopener noreferrer">
+                {file.originalName}
+              </a>
+            </div>
+          ))}
+        </div>
+        <label className="file-upload">
+          <input type="file" onChange={handleAddAttachment} />
+          <FaPaperclip /> Ajouter un fichier
+        </label>
+      </div>
+
+      <div className="task-section">
+        <h3>Extrait de code</h3>
+        {task.codeSnippet ? (
+          <pre className="code-snippet">
+            <code>{task.codeSnippet}</code>
+          </pre>
+        ) : (
+          <div className="code-form">
+            <textarea
+              value={codeSnippet}
+              onChange={(e) => setCodeSnippet(e.target.value)}
+              placeholder="Coller votre code ici..."
+            />
+            <button onClick={handleAddCodeSnippet}>
+              <FaCode /> Enregistrer le code
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="task-actions">
         {isEditing ? (
           <>
             <button onClick={handleSave} className="save-btn">
-              Enregistrer
+              <FaSave /> Enregistrer
             </button>
-            <button 
-              onClick={() => setIsEditing(false)} 
-              className="cancel-btn"
-            >
-              Annuler
+            <button onClick={() => setIsEditing(false)} className="cancel-btn">
+              <FaTimes /> Annuler
             </button>
           </>
         ) : (
           <>
-            <button 
-              onClick={() => setIsEditing(true)} 
-              className="edit-btn"
-            >
-              Modifier
+            <button onClick={() => setIsEditing(true)} className="edit-btn">
+              <FaEdit /> Modifier
             </button>
-            <button 
-              onClick={handleDelete} 
-              className="delete-btn"
-            >
-              Supprimer
-            </button>
-            <button 
-              onClick={() => navigate(-1)} 
-              className="back-btn"
-            >
-              Retour
+            <button onClick={handleDelete} className="delete-btn">
+              <FaTrash /> Supprimer
             </button>
           </>
         )}

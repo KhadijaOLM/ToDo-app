@@ -1,14 +1,22 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom'; 
+import { AuthContext } from '../context/AuthContext';
+import Menu from './Menu';
 
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
+const ProtectedRoute = ({ withMenu = false, children }) => {
+  const { isAuthenticated } = useContext(AuthContext);
+  const location = useLocation(); 
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return (
+    <>
+      {withMenu && <Menu />}
+      {children || <Outlet />}
+    </>
+  );
 };
 
 export default ProtectedRoute;

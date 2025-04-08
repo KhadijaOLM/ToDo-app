@@ -1,46 +1,53 @@
+
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const JWT_SECRET = "b74553890072f29c35b4eb869dc895acff4f863262ddd82c796a98f91acc5039";
 
 const authMiddleware = async (req, res, next) => {
-  try {
-    console.log("Headers reçus:", req.headers);
-
+    let token;
     
-    const authHeader = req.header('Authorization');
-    console.log("Authorization Header:", authHeader);
-    if (!authHeader) {
-      return res.status(401).json({ message: 'Pas de token, autorisation refusée' });
+    // Check header
+    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    } 
+    // Check cookie
+    else if (req.cookies.token && req.cookies.token.startsWith('Bearer')) {
+        token = req.cookies.token.split(' ')[1];
     }
 
-    const token = authHeader.split(' ')[1];
     if (!token) {
-      return res.status(401).json({ message: 'Format du token invalide' });
+        return res.status(401).json({
+            success: false,
+            error: 'Accès non autorisé - Token manquant'
+        });
     }
 
-    // Vérifier le token
-    let decoded;
     try {
-      decoded = jwt.verify(token, JWT_SECRET);
-      console.log("Token décodé:", decoded);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('-password');
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'Utilisateur non trouvé'
+            });
+        }
+
+        req.user = user.toObject(); // Convert Mongoose doc to plain object
+        next();
     } catch (err) {
-      return res.status(401).json({ message: 'Token invalide ou expiré' });
-    }
+        console.error('Auth middleware error:', err.message);
+        
+        let errorMessage = 'Session invalide';
+        if (err.name === 'TokenExpiredError') {
+            errorMessage = 'Session expirée';
+        } else if (err.name === 'JsonWebTokenError') {
+            errorMessage = 'Token invalide';
+        }
 
-    // Vérifier si l'utilisateur existe
-    const user = await User.findById(decoded.id).select('-password');
-    console.log("Utilisateur trouvé:", user);
-    if (!user) {
-      return res.status(401).json({ message: 'Utilisateur non trouvé' });
+        return res.status(401).json({
+            success: false,
+            error: errorMessage
+        });
     }
-
-    // Ajouter l'utilisateur à la requête
-    req.user = user;
-    next();
-  } catch (error) {
-    console.error('Erreur authMiddleware:', error);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
 };
-
 module.exports = authMiddleware;

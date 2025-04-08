@@ -1,49 +1,96 @@
-/* Style de base pour le menu */
+
 .menu {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #2c3e50; /* Couleur de fond */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #2c3e50;
+  color: white;
+}
+
+.menu-left {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.menu-right {
+  display: flex;
+  align-items: center;
+}
+
+.menu-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+  padding: 0.5rem 0;
+}
+
+.menu-link:hover {
+  opacity: 0.8;
+}
+
+.menu-link-signup {
+  background-color: #3498db;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  margin-left: 1rem;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.menu-user {
+  font-weight: 500;
+}
+
+
+.menu-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid white;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-logout:hover {
+  background-color: white;
+  color: #2c3e50;
+}
+
+.logout-icon {
+  font-size: 1.1rem;
+}
+
+.logout-text {
+  display: inline;
+}
+
+.menu-loading {
+  padding: 1rem;
+  text-align: center;
+  background-color: #2c3e50;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .logout-text {
+    display: none;
+  }
+  
+  .menu {
     padding: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Ombre légère */
   }
   
-  /* Style des liens du menu */
-  .menu-link {
-    color: #ecf0f1; /* Couleur du texte */
-    text-decoration: none;
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin: 0 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: all 0.3s ease; /* Animation fluide */
+  .menu-left, .user-section {
+    gap: 1rem;
   }
-  
-  /* Effet de survol sur les liens */
-  .menu-link:hover {
-    background-color: #1abc9c; /* Couleur de fond au survol */
-    color: #fff; /* Couleur du texte au survol */
-    transform: translateY(-2px); /* Légère élévation */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre au survol */
-  }
-  
-  /* Style actif pour le lien courant */
-  .menu-link.active {
-    background-color: #1abc9c;
-    color: #fff;
-  }
-  
-  /* Responsive design pour les petits écrans */
-  @media (max-width: 768px) {
-    .menu {
-      flex-direction: column; /* Empiler les liens verticalement */
-      padding: 0.5rem;
-    }
-  
-    .menu-link {
-      margin: 0.5rem 0; /* Espacement vertical entre les liens */
-      width: 100%; /* Pleine largeur */
-      text-align: center;
-    }
-  }
+}

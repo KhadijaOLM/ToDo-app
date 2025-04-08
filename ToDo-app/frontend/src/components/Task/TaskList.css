@@ -1,0 +1,114 @@
+/* Conteneur principal */
+.task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 12px;
+  }
+  
+  /* Élément de tâche individuelle */
+  .task-item {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Effet au survol */
+  .task-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Couleurs par statut */
+  .task-item.a-faire {
+    border-color: #FFC107; /* Jaune */
+    background-color: #FFF8E1;
+  }
+  
+  .task-item.en-cours {
+    border-color: #2196F3; /* Bleu */
+    background-color: #E3F2FD;
+  }
+  
+  .task-item.terminé {
+    border-color: #4CAF50; /* Vert */
+    background-color: #E8F5E9;
+  }
+  
+  /* Titre de la tâche */
+  .task-item h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  /* Description */
+  .task-description {
+    color: #666;
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+    display: -webkit-box;
+   /* -webkit-line-clamp: 2;*/
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Métadonnées (date) */
+  .task-meta {
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Icône optionnelle pour la date */
+  .task-meta::before {
+    content: "📅";
+    margin-right: 6px;
+    font-size: 11px;
+  }
+  
+  /* Style pour les tâches sans description */
+  .task-description:empty::after {
+    content: "Aucune description";
+    color: #999;
+    font-style: italic;
+  }
+  
+  /* Animation subtile au clic */
+  .task-item:active {
+    transform: scale(0.98);
+  }
+  /* Styles pour les labels */
+.task-labels {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .task-label {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #333;
+    background-color: #E3E3E3;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Exemples de couleurs prédéfinies */
+  .task-label.priority-high { background-color: #FFCDD2; color: #C62828; }
+  .task-label.priority-medium { background-color: #FFF9C4; color: #F9A825; }
+  .task-label.category-dev { background-color: #C8E6C9; color: #2E7D32; }

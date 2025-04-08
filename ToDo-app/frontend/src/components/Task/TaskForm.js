@@ -1,45 +1,51 @@
 import React from 'react';
-import './TaskForm.css';
+import { FaSave, FaTimes } from 'react-icons/fa';
+import '../Board/BoardItem.css'; 
 
-const TaskForm = ({ task, handleChange, handleSubmit }) => {
+const TaskForm = ({ onSubmit, onCancel }) => {
+  const [task, setTask] = React.useState({
+    title: '',
+    description: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTask(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Submit triggered");
+    if (task.title.trim()) {
+      console.log("Submitting task:", task); 
+      onSubmit(task);
+    }
+  };
+
   return (
-    <form className="task-form" onSubmit={handleSubmit}>
-      <h2>{task.id ? "Modifier la tâche" : "Ajouter une tâche"}</h2>
-      
-      <div className="form-group">
-        <label>Titre</label>
-        <input
-          type="text"
-          name="title"
-          value={task.title}
-          onChange={handleChange}
-          required
-        />
+    <form onSubmit={handleSubmit} className="simple-task-form">
+      <input
+        type="text"
+        name="title"
+        value={task.title}
+        onChange={handleChange}
+        placeholder="Titre de la tâche"
+        required
+      />
+      <textarea
+        name="description"
+        value={task.description}
+        onChange={handleChange}
+        placeholder="Description"
+      />
+      <div className="simple-form-actions">
+        <button type="submit" className="save-btn">
+          <FaSave /> Enregistrer
+        </button>
+        <button type="button" onClick={onCancel} className="cancel-btn">
+          <FaTimes /> Annuler
+        </button>
       </div>
-
-      <div className="form-group">
-        <label>Description</label>
-        <textarea
-          name="description"
-          value={task.description}
-          onChange={handleChange}
-        />
-      </div>
-
-      <div className="form-group">
-        <label>Date limite</label>
-        <input
-          type="date"
-          name="dueDate"
-          value={task.dueDate}
-          onChange={handleChange}
-          className="date-picker"
-        />
-      </div>
-
-      <button type="submit" className="submit-btn">
-        {task.id ? "Mettre à jour" : "Ajouter"}
-      </button>
     </form>
   );
 };

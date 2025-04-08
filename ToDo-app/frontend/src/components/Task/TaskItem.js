@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import './TaskItem.css';
 
 const TaskItem = ({ task, onUpdate, onDelete }) => {
@@ -28,11 +29,14 @@ const TaskItem = ({ task, onUpdate, onDelete }) => {
             name="title"
             value={editedTask.title}
             onChange={handleChange}
+            placeholder="Titre de la tâche"
+            required
           />
           <textarea
             name="description"
             value={editedTask.description}
             onChange={handleChange}
+            placeholder="Description"
           />
           <input
             type="date"
@@ -50,23 +54,35 @@ const TaskItem = ({ task, onUpdate, onDelete }) => {
             <option value="Terminé">Terminé</option>
           </select>
           <div className="task-actions">
-            <button onClick={handleSave}>Enregistrer</button>
-            <button onClick={() => setIsEditing(false)}>Annuler</button>
+            <button className="save-btn" onClick={handleSave}>
+              <FaSave /> Enregistrer
+            </button>
+            <button className="cancel-btn" onClick={() => setIsEditing(false)}>
+              <FaTimes /> Annuler
+            </button>
           </div>
         </div>
       ) : (
         <>
           <Link to={`/tasks/${task._id}`} className="task-content">
-            <h3>{task.title}</h3>
-            <p>{task.description}</p>
+            <h4>{task.title}</h4>
+            <p className="task-description">
+              {task.description || 'Aucune description'}
+            </p>
             <div className="task-meta">
-              <span>Statut: {task.status}</span>
-              <span>Échéance: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Non définie'}</span>
+              <span className="task-status">{task.status}</span>
+              <span className="task-due-date">
+                {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Non définie'}
+              </span>
             </div>
           </Link>
           <div className="task-actions">
-            <button onClick={() => setIsEditing(true)}>Modifier</button>
-            <button onClick={() => onDelete(task._id)}>Supprimer</button>
+            <button className="edit-btn" onClick={() => setIsEditing(true)}>
+              <FaEdit /> Modifier
+            </button>
+            <button className="delete-btn" onClick={() => onDelete(task._id)}>
+              <FaTrash /> Supprimer
+            </button>
           </div>
         </>
       )}

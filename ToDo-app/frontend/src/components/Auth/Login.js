@@ -1,59 +1,88 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; 
 import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/boards';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        navigate('/boards');
+      const result = await login({ email, password });
+      console.log('Résultat login:', result);
+      
+      if (result.success) {
+        navigate(from, { replace: true }); // Décommenté et activé
       } else {
-        alert(data.message || 'Erreur de connexion');
+        setError(result.message || 'Échec de la connexion');
       }
     } catch (err) {
-      console.error('Erreur lors de la connexion :', err);
-      alert('Une erreur s\'est produite lors de la connexion');
+      console.error('Erreur lors de la connexion:', err);
+      setError('Une erreur technique est survenue');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Se connecter</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Se connecter</button>
-      </form>
-      <p>Pas encore de compte ? <Link to="/register">S'inscrire</Link></p>
+      <div className="login-card">
+        <h2>Connexion</h2>
+        
+        {error && <div className="login-error">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="username"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Mot de passe</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
+          
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className={isLoading ? 'loading' : ''}
+          >
+            {isLoading ? 'Connexion en cours...' : 'Se connecter'}
+          </button>
+        </form>
+        
+        <div className="login-links">
+          <Link to="/register">Créer un compte</Link>
+          <Link to="/forgot-password">Mot de passe oublié ?</Link>
+        </div>
+      </div>
     </div>
   );
 };

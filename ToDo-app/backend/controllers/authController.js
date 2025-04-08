@@ -1,71 +1,119 @@
+
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = "b74553890072f29c35b4eb869dc895acff4f863262ddd82c796a98f91acc5039";
 
-// Inscription d'un utilisateur
-const registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
+// Configuration
+const JWT_CONFIG = {
+  expiresIn: process.env.JWT_EXPIRES_IN || '1h'
+};
+
+// Fonction de génération de token (centralisée)
+exports.generateToken = (userId) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET non configuré');
+  }
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET, JWT_CONFIG);
+};
+
+// Inscription
+exports.registerUser = async (req, res) => {
   try {
+    // La validation est déjà faite par le middleware
+    const { email, password, username } = req.body;
+
     // Vérifier si l'utilisateur existe déjà
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ message: 'Cet utilisateur existe déjà' });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: 'Un utilisateur avec cet email existe déjà'
+      });
     }
 
-    // Hasher le mot de passe
+    // Hash du mot de passe
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Créer un nouvel utilisateur
-    user = new User({
+    // Création de l'utilisateur
+    const user = new User({
       username,
       email,
-      password: hashedPassword,
+      password: hashedPassword
     });
 
     await user.save();
 
-    // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
-      expiresIn: '1h',
+    // Génération du token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' || '30d' }
+    );
+
+    res.status(201).json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
 
-    res.status(201).json({ token });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Erreur lors de l\'inscription:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur serveur lors de l\'inscription'
+    });
   }
 };
 
-// Connexion d'un utilisateur
-const loginUser = async (req, res) => {
+exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Vérifier si l'utilisateur existe
+    // Vérifier l'utilisateur
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Utilisateur non trouvé' });
+      return res.status(401).json({
+        success: false,
+        error: 'Identifiants invalides'
+      });
     }
 
     // Vérifier le mot de passe
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Mot de passe incorrect' });
+      return res.status(401).json({
+        success: false,
+        error: 'Identifiants invalides'
+      });
     }
 
-    // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
-      expiresIn: '1h',
+    // Génération du token
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRE || '30d' }
+    );
+
+    res.json({
+      success: true,
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
 
-    res.status(200).json({ token });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Erreur lors de la connexion:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Erreur serveur lors de la connexion'
+    });
   }
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
 };
