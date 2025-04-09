@@ -1,13 +1,13 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const JWT_SECRET="b74553890072f29c35b4eb869dc895acff4f863262ddd82c796a98f91acc5039";
+require('dotenv').config();
 
 // Inscription d'un utilisateur
 const registerUser = async (req, res) => {
   try {
     console.log("Données reçues :", req.body); 
-    const { username, email, password , role} = req.body;
+    const { username, email, password, role } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
     let user = await User.findOne({ email });
@@ -24,11 +24,30 @@ const registerUser = async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      role: role || 'user'
     });
 
     await user.save();
+    
+    // Générer un token JWT
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+    
     console.log("Utilisateur enregistré :", user);
-    res.status(201).json(user);
+    
+    // Ne pas renvoyer le mot de passe
+    const userResponse = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+    
+    res.status(201).json({
+      user: userResponse,
+      token
+    });
   } catch (err) {
     console.error("Erreur lors de l'inscription :", err); 
     res.status(500).json({ message: err.message });
@@ -53,11 +72,22 @@ const loginUser = async (req, res) => {
     }
 
     // Générer un token JWT
-    const token = jwt.sign({ id: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
 
-    res.status(200).json({ token });
+    // Ne pas renvoyer le mot de passe
+    const userResponse = {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role
+    };
+
+    res.status(200).json({
+      user: userResponse,
+      token
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -73,6 +103,28 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// Vérifier le token JWT
+const verifyToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ valid: false, message: 'Aucun token fourni' });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ valid: false, message: 'Utilisateur non trouvé' });
+    }
+    
+    res.status(200).json({ valid: true, user });
+  } catch (err) {
+    res.status(401).json({ valid: false, message: 'Token invalide ou expiré' });
+  }
+};
+
 // Mettre à jour les informations de l'utilisateur
 const updateUser = async (req, res) => {
   try {
@@ -81,7 +133,7 @@ const updateUser = async (req, res) => {
       { _id: req.user.id }, 
       { username, email },
       { new: true } 
-    );
+    ).select('-password');
 
     if (!user) {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
@@ -113,4 +165,5 @@ module.exports = {
   getCurrentUser,
   updateUser,
   deleteUser,
+  verifyToken
 };

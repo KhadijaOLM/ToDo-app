@@ -3,7 +3,7 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import StatusColumn from './StatusColumn';
 import './KanbanView.css';
 
-const KanbanView = ({ tasks, onTaskUpdate, onDeleteTask, onAddTask }) => {
+const KanbanView = ({ tasks, onTaskUpdate, onDeleteTask, onAddTask, onEditTask }) => {
   const statusConfig = [
     { id: 'todo', title: 'A faire' },
     { id: 'in-progress', title: 'En cours' },
@@ -22,7 +22,7 @@ const KanbanView = ({ tasks, onTaskUpdate, onDeleteTask, onAddTask }) => {
 
     const task = tasks.find(t => t._id === draggableId);
     if (!task) return;
-
+    
     const newStatus = statusConfig.find(s => s.id === destination.droppableId)?.title;
     if (!newStatus || task.status === newStatus) return;
 
@@ -44,9 +44,9 @@ const KanbanView = ({ tasks, onTaskUpdate, onDeleteTask, onAddTask }) => {
                   className="status-column"
                 >
                   <StatusColumn 
-                    title={title}
+                    status={title}
                     tasks={columnTasks}
-                    onEditTask={onTaskUpdate}
+                    onEditTask={onEditTask} 
                     onDeleteTask={onDeleteTask}
                     onAddTask={() => onAddTask(title)}
                   />

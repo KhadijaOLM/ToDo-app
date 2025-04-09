@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 //import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -110,6 +109,18 @@ export const AuthProvider = ({ children }) => {
     setUser(prev => ({ ...prev, ...updatedUser }));
   };
 
+  // Fonction pour vérifier explicitement l'authentification
+  const checkAuthStatusExplicit = async () => {
+    try {
+      const response = await api.get('/users/me');
+      console.log('Authentification vérifiée:', response.data);
+      return true;
+    } catch (error) {
+      console.error('Erreur de vérification d\'authentification:', error);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -119,7 +130,8 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        updateUser
+        updateUser,
+        checkAuthStatus: checkAuthStatusExplicit // Ajouter cette nouvelle fonction
       }}
     >
       {children}

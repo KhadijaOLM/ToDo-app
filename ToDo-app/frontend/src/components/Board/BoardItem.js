@@ -1,88 +1,98 @@
-
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../utils/api';
-import axios from 'axios';
 import TaskList from '../Task/TaskList';
 import TaskForm from '../Task/TaskForm';
-import { FaEdit, FaTrash, FaSave, FaPlus, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSave, FaPlus, FaTimes, FaArrowRight } from 'react-icons/fa';
 import './BoardItem.css';
 
-const BoardItem = ({ board, onEdit, onDelete }) => {
+const BoardItem = ({ board, onEdit, onDelete, linkTo }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
-    title: board.title,
-    description: board.description
+    title: board.title || '',
+    description: board.description || ''
   });
 
   const [tasks, setTasks] = useState([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const boardId = board._id || board.id;
+
+  useEffect(() => {
+    // Mettre à jour les données d'édition si le board change
+    setEditData({
+      title: board.title || '',
+      description: board.description || ''
+    });
+  }, [board]);
 
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!boardId) return;
+      
       setLoadingTasks(true);
       try {
-        const response = await api.get(`/tasks`, { 
-          params: { boardId: board._id }, 
-          headers: { 
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setTasks(response.data);
+        // Use the correct endpoint for getting tasks by board ID
+        const response = await api.get(`/tasks/board/${boardId}`);
+        setTasks(response.data || []);
       } catch (err) {
-        console.error('Erreur chargement tâches:', {
-          status: err.response?.status,
-          data: err.response?.data,
-          message: err.message
-        });
+        console.error('Erreur chargement tâches:', err);
+        // As a fallback, try getting all tasks and filter by boardId on the client side
+        try {
+          const response = await api.get('/tasks');
+          if (response.data && Array.isArray(response.data)) {
+            // Filter tasks by boardId manually
+            const filteredTasks = response.data.filter(task => task.boardId === boardId);
+            setTasks(filteredTasks);
+          }
+        } catch (fallbackErr) {
+          console.error('Erreur fallback chargement tâches:', fallbackErr);
+          setTasks([]);
+        }
       } finally {
         setLoadingTasks(false);
       }
     };
-        fetchTasks();
-      }, [board._id]);
+    
+    fetchTasks();
+  }, [boardId]);
 
-      const handleAddTask = async (newTask) => {
-        try {
-          const response = await axios.post(
-            'http://localhost:5000/api/tasks', 
-            {
-              ...newTask, 
-              status: 'A faire', 
-              boardId: board._id,
-              createdAt: new Date()
-            },
-            {
-              headers: { 
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json' 
-              }
-            }
-          );
+  const handleAddTask = async (newTask) => {
+    try {
+      const response = await api.post('/tasks', {
+        ...newTask, 
+        status: 'A faire', 
+        boardId,
+        createdAt: new Date()
+      });
       
-          setTasks([...tasks, response.data]);
-          setShowTaskForm(false);
-        } catch (err) {
-          console.error('Erreur détaillée:', {
-            message: err.message,
-            status: err.response?.status,
-            data: err.response?.data 
-          });
-          alert(`Échec de la création : ${err.response?.data?.message || err.message}`);
-        }
-      };
+      setTasks([...tasks, response.data]);
+      setShowTaskForm(false);
+    } catch (err) {
+      console.error('Erreur lors de la création de la tâche:', err);
+      alert(`Échec de la création : ${err.response?.data?.message || err.message}`);
+    }
+  };
 
-      const handleSave = () => {
-        console.log('Current board:', board);
-        onEdit(board._id, {
-          title: editData.title,
-          description: editData.description
-        });
-        setIsEditing(false);
-      };
+  const handleSave = () => {
+    if (onEdit && typeof onEdit === 'function') {
+      onEdit({
+        title: editData.title,
+        description: editData.description
+      });
+    }
+    setIsEditing(false);
+  };
+
+  const handleDelete = () => {
+    if (onDelete && typeof onDelete === 'function') {
+      onDelete();
+    }
+  };
 
   const handleTaskClick = (taskId) => {
-    window.location.href = `/tasks/${taskId}`;
+    // Utilisez un Link pour naviguer vers la tâche plutôt que window.location
+    // pour garder l'état de l'application React
   }
 
   return (
@@ -111,36 +121,51 @@ const BoardItem = ({ board, onEdit, onDelete }) => {
       ) : (
         <>
           <div className="board-header">
-            <h3>{board.title}</h3>
-            <p>{board.description}</p>
+            <h3>{board.title || 'Sans titre'}</h3>
+            <p>{board.description || 'Aucune description'}</p>
           </div>
 
-          <button 
-            onClick={() => setShowTaskForm(!showTaskForm)} 
-            className="add-task-btn"
-          >
-            <FaPlus /> {showTaskForm ? 'Annuler' : 'Ajouter une tâche'}
-          </button>
-
-          {showTaskForm && (
-            <TaskForm 
-              onSubmit={handleAddTask}
-              onCancel={() => setShowTaskForm(false)}
-            />
-          )}
-
-          {loadingTasks ? (
-            <p>Chargement des tâches...</p>
+          {linkTo ? (
+            <Link to={linkTo} className="board-link">
+              Ouvrir le tableau <FaArrowRight />
+            </Link>
           ) : (
-            <TaskList tasks={tasks}
-            onTaskClick={handleTaskClick} />
+            <>
+              <button 
+                onClick={() => setShowTaskForm(!showTaskForm)} 
+                className="add-task-btn"
+              >
+                <FaPlus /> {showTaskForm ? 'Annuler' : 'Ajouter une tâche'}
+              </button>
+
+              {showTaskForm && (
+                <TaskForm 
+                  onSubmit={handleAddTask}
+                  onCancel={() => setShowTaskForm(false)}
+                />
+              )}
+
+              {loadingTasks ? (
+                <p className="loading-tasks">Chargement des tâches...</p>
+              ) : (
+                tasks && tasks.length > 0 ? (
+                  // Make sure tasks is an array before passing to TaskList
+                  <TaskList 
+                    tasks={Array.isArray(tasks) ? tasks : []}
+                    onTaskClick={handleTaskClick} 
+                  />
+                ) : (
+                  <p className="no-tasks">Aucune tâche dans ce tableau</p>
+                )
+              )}
+            </>
           )}
 
           <div className="board-actions">
             <button className="edit-btn" onClick={() => setIsEditing(true)}>
               <FaEdit /> Modifier
             </button>
-            <button className="delete-btn" onClick={() => onDelete(board._id)}>
+            <button className="delete-btn" onClick={handleDelete}>
               <FaTrash /> Supprimer
             </button>
           </div>

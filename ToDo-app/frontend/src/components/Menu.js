@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiLogOut, FiHome } from 'react-icons/fi';
+import { FiLogOut, FiHome, FiGrid, FiLayers } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import './Menu.css';
 
@@ -18,10 +18,16 @@ export default function Menu() {
     <nav className="menu">
       <div className="menu-left">
         <Link to="/" className="menu-link">
-        <FiHome className="logout-icon" />Home</Link>
+          <FiHome className="menu-icon" />Home
+        </Link>
         {isAuthenticated && (
           <>
-            <Link to="/dashboard" className="menu-link">Dashboard</Link>
+            <Link to="/dashboard" className="menu-link">
+              <FiGrid className="menu-icon" />Dashboard
+            </Link>
+            <Link to="/workspaces" className="menu-link">
+              <FiLayers className="menu-icon" />Espaces de travail
+            </Link>
             <Link to="/boards" className="menu-link">Boards</Link>
           </>
         )}

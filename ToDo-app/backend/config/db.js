@@ -1,13 +1,15 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
+
 const connectDB = async () => {
   try {
-    await mongoose.connect('mongodb://localhost:27017/ToDo-app', {
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/ToDo-app', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
     console.log('MongoDB connected');
   } catch (err) {
-    console.error(err.message);
+    console.error('Erreur de connexion à MongoDB :', err.message);
     process.exit(1);
   }
 };

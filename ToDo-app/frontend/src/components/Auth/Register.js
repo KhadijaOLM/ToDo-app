@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; 
-import axios from 'axios'; 
+import api from '../../utils/api'; 
 import './Register.css';
 
 const Register = () => {
@@ -14,19 +14,16 @@ const Register = () => {
     e.preventDefault();
 
     try {
-    
-      const response = await axios.post('http://localhost:5000/api/users/register', {
+      const response = await api.post('/users/register', {
         username,
         email,
         password,
       });
 
-
       if (response.status === 201) {
         navigate('/login'); 
       }
     } catch (err) {
-      
       setError(err.response?.data?.message || 'Une erreur est survenue');
     }
   };

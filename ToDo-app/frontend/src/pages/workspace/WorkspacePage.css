@@ -1,0 +1,172 @@
+.workspace-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.workspace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.workspace-title-section h1 {
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.workspace-description {
+  color: #666;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.workspace-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-edit, .btn-delete, .btn-back {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-edit {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+}
+
+.btn-edit:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-delete {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.btn-delete:hover {
+  background-color: #d32f2f;
+}
+
+.btn-back {
+  background-color: #f0f0f0;
+  color: #333;
+  border: none;
+}
+
+.btn-back:hover {
+  background-color: #e0e0e0;
+}
+
+.edit-workspace-section {
+  margin-bottom: 30px;
+}
+
+.edit-workspace-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.boards-section {
+  margin-top: 20px;
+}
+
+.boards-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.boards-header h2 {
+  font-size: 1.6rem;
+  margin: 0;
+  color: #333;
+}
+
+.btn-add-board {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-add-board:hover {
+  background-color: #0055aa;
+}
+
+.boards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.no-boards {
+  text-align: center;
+  padding: 30px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.error-container {
+  padding: 30px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+.back-link {
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.not-found {
+  text-align: center;
+  padding: 50px;
+}
+
+.not-found h2 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 20px;
+}

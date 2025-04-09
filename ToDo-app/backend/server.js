@@ -1,16 +1,18 @@
-
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const connectDB = require('./config/db');
 const boardRoutes = require('./routes/boardRoutes');
 const cardRoutes = require('./routes/cardRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 const listRoutes = require('./routes/listRoutes');
 const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/TaskRoutes');
+const workspaceRoutes = require('./routes/workspaceRoutes'); // Ajout des routes workspace
 require('dotenv').config();
-console.log("[DEBUG] JWT_SECRET:", process.env.JWT_SECRET);
 
+// Vérification de variables d'environnement critiques
 if (!process.env.JWT_SECRET) {
   console.error('ERREUR: JWT_SECRET non défini dans .env');
   process.exit(1);
@@ -30,27 +32,12 @@ app.use(cors({
   exposedHeaders: ['Authorization']
 }));
 
-
-
-
 // Connexion à MongoDB
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('Erreur de connexion à MongoDB :', err.message);
-    process.exit(1);
-  }
-};
-
 connectDB();
 
 app.use(require('./middleware/debugRoutes'));
 
+// Middleware de logging des requêtes
 app.use((req, res, next) => {
   console.log('\n=== REQUÊTE REÇUE ===');
   console.log('URL:', req.originalUrl);
@@ -61,16 +48,12 @@ app.use((req, res, next) => {
   console.log('=====================\n');
   next();
 });
-app.use((req, res, next) => {
 
+// Middleware pour s'assurer que le Content-Type est défini
+app.use((req, res, next) => {
   if (!req.headers['content-type']) {
     req.headers['content-type'] = 'application/json';
   }
-  
-  if (req.body) {
-    req.body = JSON.parse(JSON.stringify(req.body));
-  }
-  
   next();
 });
 
@@ -81,6 +64,8 @@ app.use('/api/cards', cardRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/lists', listRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/workspaces', workspaceRoutes); // Ajout de la route des espaces de travail
 
 // Démarrage du serveur
 const PORT = process.env.PORT || 5000;
